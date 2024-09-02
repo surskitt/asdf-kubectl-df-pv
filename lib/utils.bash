@@ -2,7 +2,6 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for kubectl-df-pv.
 GH_REPO="https://github.com/yashbhutwala/kubectl-df-pv"
 TOOL_NAME="kubectl-df-pv"
 TOOL_TEST="df-pv --help"
@@ -31,8 +30,6 @@ list_github_tags() {
 }
 
 list_all_versions() {
-	# TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-	# Change this function if kubectl-df-pv has other means of determining installable versions.
 	list_github_tags
 }
 
@@ -41,8 +38,23 @@ download_release() {
 	version="$1"
 	filename="$2"
 
+	os="$(uname -s)"
+	arch="$(uname -m)"
+
+	if [[ "${arch}" == "i386" ]] ; then
+		arch="386"
+	fi
+
+	if [[ "${arch}" == "x86_64" ]] ; then
+		arch="amd64"
+	fi
+
+	system="${os,,}_${arch}"
+
 	# TODO: Adapt the release URL convention for kubectl-df-pv
 	url="$GH_REPO/archive/v${version}.tar.gz"
+	# https://github.com/yashbhutwala/kubectl-df-pv/releases/download/v0.3.0/kubectl-df-pv_v0.3.0_linux_amd64.tar.gz
+	url="${GH_REPO}/releases/download/v${version}/kubectl-df-pv_v${version}_${system}.tar.gz"
 
 	echo "* Downloading $TOOL_NAME release $version..."
 	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
